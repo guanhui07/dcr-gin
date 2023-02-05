@@ -1,0 +1,30 @@
+port: 5555
+# 数据库配置
+datasource:
+  driverName: mysql
+  host: 192.168.3.251
+  port: 3306
+  database: dg_hwb_plantform
+  username: root
+  password: df562c8543707aa0
+  charset: utf8mb4
+  loc: Asia/Shanghai
+
+# local configuration
+local:
+  url: 'http://127.0.0.1:5555/' # 访问路径
+  path: 'weigh_snapshot' # 访问路径
+  store-path: 'weigh_snapshot' # 存储路径
+  expires-time: 2592000 # 上传文件预命名缓存时间(秒)
+  
+# redis configuration
+redis:
+  db: 0
+  addr: '192.168.3.251:6379'
+  password: ''
+#加密字段的盐值和长度
+hashids:
+  salt: 543707aa0df562c8
+  minLength: 10
+uploadTicket:
+  url: 'http://19.106.237.3:84/bhw/req/bhwLandfill/eventRcv/getLandfillJson'

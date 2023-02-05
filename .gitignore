@@ -1,0 +1,8 @@
+logs
+logs/*
+.idea
+*.exe
+uploads/
+weigh_snapshot/
+vendor
+

@@ -1,0 +1,11 @@
+
+swag init
+
+https://ieevee.com/tech/2018/04/19/go-swag.html
+
+https://www.lixueduan.com/posts/go/swagger/
+
+
+http://localhost:9090/swagger/index.html#/
+
+

@@ -23,7 +23,7 @@ redis:
   password: ''
 #加密字段的盐值和长度
 hashids:
-  salt: 543707aa0df562c8
+  salt: test12345678
   minLength: 10
 uploadTicket:
   url: 'http://19.1.1.3:84/bhw/req/bhwLandfill/eventRcv/getLandfillJson'

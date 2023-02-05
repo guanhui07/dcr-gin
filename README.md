@@ -5,12 +5,12 @@
 - middleware
 - redis
 - goutils
-- zaplogger
+- zaplog
 - console
 - validate
 - config  yaml文件
 
-
+## 加载依赖包
 ```
 go mod tidy
 go mod vendor

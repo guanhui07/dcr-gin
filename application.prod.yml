@@ -1,12 +1,12 @@
-port: 5555
+port: 9090
 # 数据库配置
 datasource:
   driverName: mysql
-  host: 192.168.3.251
+  host: 127.0.0.1
   port: 3306
   database: dg_hwb_plantform
   username: root
-  password: df562c8543707aa0
+  password: 123456
   charset: utf8mb4
   loc: Asia/Shanghai
 
@@ -20,11 +20,11 @@ local:
 # redis configuration
 redis:
   db: 0
-  addr: '192.168.3.251:6379'
+  addr: '127.0.0.1:6379'
   password: ''
 #加密字段的盐值和长度
 hashids:
-  salt: 543707aa0df562c8
+  salt: test12345678
   minLength: 10
 uploadTicket:
-  url: 'http://19.106.237.3:84/bhw/req/bhwLandfill/eventRcv/getLandfillJson'
+  url: 'http://19.106.111.3:84/bhw/req/bhwLandfill/eventRcv/getLandfillJson'

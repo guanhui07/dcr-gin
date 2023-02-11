@@ -10,8 +10,10 @@
 - validate
 - config  yaml文件
 
-## 加载依赖包
+## install
 ```
+git clone https://github.com/guanhui07/dcr-gin.git
+cd dcr-gin
 go mod tidy
 go mod vendor
 ```

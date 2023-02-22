@@ -18,9 +18,6 @@ require (
 	github.com/lestrrat/go-file-rotatelogs v0.0.0-20180223000712-d3151e2a480f
 	github.com/speps/go-hashids v2.0.0+incompatible
 	github.com/spf13/viper v1.9.0
-	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2
-	github.com/swaggo/gin-swagger v1.3.2
-	github.com/swaggo/swag v1.8.5
 	github.com/wxnacy/wgo v1.0.4
 	go.uber.org/zap v1.19.1
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90

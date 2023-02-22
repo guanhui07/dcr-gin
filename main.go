@@ -4,11 +4,8 @@ import (
 	"dcr-gin/app/global"
 	"dcr-gin/app/initialize"
 	"dcr-gin/app/job"
-	"dcr-gin/docs"
 	"fmt"
 	"github.com/gookit/goutil/dump"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"strconv"
 
 	// 初始化数据库连接及日志文件
@@ -16,7 +13,6 @@ import (
 	// 数据模型中init方法的执行
 	_ "dcr-gin/app/model"
 	// 文档
-	_ "dcr-gin/docs"
 )
 
 // @title 权限系统API文档
@@ -37,11 +33,8 @@ func main() {
 	// 获取端口号
 	PORT := strconv.Itoa(global.ServerConfig.Port)
 	fmt.Println(PORT + "当前端口")
-	docs.SwaggerInfo.BasePath = "/api/v1"
 
-	url := ginSwagger.URL(fmt.Sprintf("http://localhost:%s/swagger/doc.json", PORT))
 	// swagger访问地址:localhost:5555/swagger/index.html
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	dump.P("http://localhost:5555/swagger/index.html")
 	global.Logger.Sugar().Infof("服务已经启动:localhost:%s", PORT)
 

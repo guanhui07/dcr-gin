@@ -51,7 +51,7 @@ func GenerateToken(u TokenUser) (string, error) {
 // ParseToken 定义解析token的方法
 func ParseToken(tokenString string) (*jwt.Token, *MyClaims, error) {
 	claims := &MyClaims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (any, error) {
 		return jwtKey, nil
 	})
 	return token, claims, err

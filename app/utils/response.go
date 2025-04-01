@@ -6,7 +6,7 @@ import (
 )
 
 // Response 通用的返回
-func Response(ctx *gin.Context, code int, msg string, data interface{}) {
+func Response(ctx *gin.Context, code int, msg string, data any) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"code": code,
 		"msg":  msg,
@@ -15,7 +15,7 @@ func Response(ctx *gin.Context, code int, msg string, data interface{}) {
 }
 
 // SuccessApi Success 成功的请求
-func SuccessApi(ctx *gin.Context, data interface{}, msg string) {
+func SuccessApi(ctx *gin.Context, data any, msg string) {
 	if msg == "" {
 		msg = "请求成功"
 	}
@@ -24,7 +24,7 @@ func SuccessApi(ctx *gin.Context, data interface{}, msg string) {
 }
 
 // Success 成功的请求
-func Success(ctx *gin.Context, data interface{}, msg string) {
+func Success(ctx *gin.Context, data any, msg string) {
 	if msg == "" {
 		msg = "请求成功"
 	}

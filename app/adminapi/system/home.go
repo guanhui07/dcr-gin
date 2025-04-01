@@ -32,7 +32,7 @@ type TodayStationCount struct {
 type ReturnValue struct {
 	TodayStatusStatistics []TodayStatisticCount `json:"today_status_statistics"`
 	TodayTicketCount      []TodayStationCount   `json:"today_ticket_count"`
-	RightPic              interface{}           `json:"right_pic"`
+	RightPic              any                   `json:"right_pic"`
 }
 
 // TicketSuccessStatus 成功状态信息
@@ -146,13 +146,14 @@ func getTotalWeightCount(dbTicketModel *gorm.DB, startTime string, TotalWeightCo
 }
 
 func dealTotalWeightCount(TodayCountDataSlice []TodayStatisticCount, TotalWeightCount int64) []TodayStatisticCount {
-	if len(TodayCountDataSlice) > 0 {
-		for key, element := range TodayCountDataSlice {
-			if TotalWeightCount > 0 {
-				value := float64(element.Total) / float64(TotalWeightCount)
-				successRate := fmt.Sprintf("%.2f", value)
-				TodayCountDataSlice[key].Ratio = successRate
-			}
+	if len(TodayCountDataSlice) <= 0 {
+		return TodayCountDataSlice
+	}
+	for key, element := range TodayCountDataSlice {
+		if TotalWeightCount > 0 {
+			value := float64(element.Total) / float64(TotalWeightCount)
+			successRate := fmt.Sprintf("%.2f", value)
+			TodayCountDataSlice[key].Ratio = successRate
 		}
 	}
 	return TodayCountDataSlice
@@ -163,7 +164,8 @@ func getSuccessStatusDataSlice(dbTicketModel *gorm.DB, startYear string, Success
 		Where("add_time>?", startYear).
 		Where("upload_status=?", 2).
 		Select("date_format(add_time,'%m') as month ", "count(id) as total").
-		Group("month").Find(&SuccessStatusDataSlice)
+		Group("month").
+		Find(&SuccessStatusDataSlice)
 	return SuccessCount, SuccessStatusDataSlice
 }
 
@@ -172,7 +174,8 @@ func getFailStatusDataSlice(dbTicketModel *gorm.DB, startYear string, FailStatus
 		Where("add_time>?", startYear).
 		Where("upload_status=?", 1).
 		Select("date_format(add_time,'%m') as month ", "count(id) as total").
-		Group("month").Find(&FailStatusDataSlice)
+		Group("month").
+		Find(&FailStatusDataSlice)
 	return FailCount, FailStatusDataSlice
 }
 
@@ -186,12 +189,13 @@ func getMonthTicketTotalDataSlice(dbTicketModel *gorm.DB, startYear string, Mont
 }
 
 func getStationCountDataSlice(TicketModel model.Ticket, startTime string, StationCountDataSlice []TodayStationCount) (*gorm.DB, []TodayStationCount) {
-	return global.DB.Model(TicketModel).
+	base := global.DB.Model(TicketModel).
 		Where("pf_ticket_info.add_time>?", startTime).
 		Select("count(pf_ticket_info.id) as total", "pf_station_info.name").
 		Joins("left join pf_station_info on pf_station_info.id = pf_ticket_info.station_id").
 		Group("pf_station_info.name").
-		Find(&StationCountDataSlice), StationCountDataSlice
+		Find(&StationCountDataSlice)
+	return base, StationCountDataSlice
 }
 
 func getTodayCountDataSlice(TicketModel model.Ticket, startTime string, TodayCountDataSlice []TodayStatisticCount) (*gorm.DB, []TodayStatisticCount) {

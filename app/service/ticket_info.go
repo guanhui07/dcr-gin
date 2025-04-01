@@ -10,7 +10,7 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-func TicketInfo(c *gin.Context, getByIdDto requestDto.GetById) (ticketInfoRes responseDto.TicketInfoRes, err error) {
+func TicketInfo(c *gin.Context, getByIdDto requestDto.GetByIdReq) (ticketInfoRes responseDto.TicketInfoRes, err error) {
 	ticketModel := model.Ticket{}
 	//查询一行记录
 	info := global.DB.Where("id=?", getByIdDto.Id).First(&ticketModel)

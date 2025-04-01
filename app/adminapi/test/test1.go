@@ -38,7 +38,7 @@ func Test1(c *gin.Context) {
 		utils.Fail(c, "非管理员账户,无法修改密码")
 		return
 	}
-	var userRes requestDto.ChangeAdminPw
+	var userRes requestDto.ChangeAdminPwReq
 	if err := c.ShouldBindJSON(&userRes); err != nil {
 		message := utils.ShowErrorMessage(err)
 		utils.Fail(c, message)
@@ -53,8 +53,8 @@ func Test1(c *gin.Context) {
 	}
 	utils.Fail(c, result.Error())
 
-	apiBodyList := make([]map[string]interface{}, 0)
-	itemMap1 := map[string]interface{}{
+	apiBodyList := make([]map[string]any, 0)
+	itemMap1 := map[string]any{
 		"k": "v1",
 	}
 	apiBodyList = append(apiBodyList, itemMap1)

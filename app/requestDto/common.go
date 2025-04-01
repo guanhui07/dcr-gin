@@ -17,8 +17,8 @@ type PageInfo struct {
 }
 */
 
-// GetById Find by id structure
-type GetById struct {
+// GetByIdReq Find by id structure
+type GetByIdReq struct {
 	Id int `json:"id" form:"id"` // 主键Id
 }
 

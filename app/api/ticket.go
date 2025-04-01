@@ -29,35 +29,33 @@ curl --location --request POST 'http://localhost:9090/api/ticket/photoUuid' \
 */
 func GetTicketPhotoUuid(c *gin.Context) {
 	var stationTicketDto requestDto.StationTicketReq
-	//从路由获取get 参数stationId
+	//从协程上下文获取参数 中间件set
 	stationId, _ := c.Get("stationId")
-	// 强制转字符串
-	stationIdSrt := fmt.Sprintf("%v", stationId)
+	tigerShaped, _ := c.Get("tigerShaped")
+	sign, _ := c.Get("sign")
+	device, _ := c.Get("device")
+	stationIdSrt := fmt.Sprintf("%v", stationId) // 强制转字符串
 	stationTicketDto.StationId = stationIdSrt
-	// 绑定json 到dto
-	if err := c.ShouldBindBodyWith(&stationTicketDto, binding.JSON); err != nil {
-		// 校验数据是否合法
+	err := c.ShouldBindBodyWith(&stationTicketDto, binding.JSON) // 绑定json 到dto
+	if err != nil {                                              // 校验数据是否合法
 		msg := utils.ShowErrorMessage(err)
 		utils.Fail(c, msg)
 		return
 	}
-	//获取握手符号
-	tigerShaped, _ := c.Get("tigerShaped")
-	sign, _ := c.Get("sign")
-	device, _ := c.Get("device")
 	//构建签名切片
 	signParam := make(map[string]string)
 	signParam["ticket_id"] = stationTicketDto.TicketId
 	signParam["device"] = fmt.Sprintf("%v", device)
 	//验证签名
-	if !utils.CheckMd5Sign(signParam, fmt.Sprintf("%v", tigerShaped), fmt.Sprintf("%v", sign)) {
+	bool := utils.CheckMd5Sign(signParam, fmt.Sprintf("%v", tigerShaped), fmt.Sprintf("%v", sign))
+	if !bool {
 		//utils.Fail(c, "签名错误")
 		//return
 	}
 	//获取图片名字
-	res, err := service.GetTicketPhotoUuid(c, stationTicketDto)
+	ret, err := service.GetTicketPhotoUuid(c, stationTicketDto)
 	if err == nil {
-		utils.Success(c, res, "")
+		utils.Success(c, ret, "")
 		return
 	}
 	utils.Fail(c, "缓存文件名错误")
@@ -93,7 +91,7 @@ func UploadTicketPhoto(c *gin.Context) {
 		utils.Fail(c, "站点标识不能为空")
 		return
 	}
-	//获取握手符号
+	//获取握手符号 从请求获取上下文  一般从中间件设置
 	tigerShaped, _ := c.Get("tigerShaped")
 	sign, _ := c.Get("sign")
 	//构建签名切片
@@ -102,7 +100,8 @@ func UploadTicketPhoto(c *gin.Context) {
 	// 强转字符串
 	signParam["device"] = fmt.Sprintf("%v", ticketUploadReqDto.Device)
 	//验证签名
-	if !utils.CheckMd5Sign(signParam, fmt.Sprintf("%v", tigerShaped), fmt.Sprintf("%v", sign)) {
+	bool := utils.CheckMd5Sign(signParam, fmt.Sprintf("%v", tigerShaped), fmt.Sprintf("%v", sign))
+	if !bool {
 		//utils.Fail(c, "签名错误")
 		//return
 	}
@@ -129,7 +128,8 @@ post http://localhost:9090/api/ticket/upload
 */
 func UploadTicket(c *gin.Context) {
 	var ticketApiReqDto requestDto.TicketApiReq
-	if err := c.ShouldBindBodyWith(&ticketApiReqDto, binding.JSON); err != nil {
+	err := c.ShouldBindBodyWith(&ticketApiReqDto, binding.JSON)
+	if err != nil {
 		// 校验数据是否合法
 		msg := utils.ShowErrorMessage(err)
 		utils.Fail(c, msg)
@@ -149,7 +149,8 @@ func UploadTicket(c *gin.Context) {
 	tigerShaped, _ := c.Get("tigerShaped")
 	sign, _ := c.Get("sign")
 	//验证签名 强转字符串
-	if !utils.CheckMd5Sign(signParam, fmt.Sprintf("%v", tigerShaped), fmt.Sprintf("%v", sign)) {
+	bool := utils.CheckMd5Sign(signParam, fmt.Sprintf("%v", tigerShaped), fmt.Sprintf("%v", sign))
+	if !bool {
 		//utils.Fail(c, "签名错误")
 		//return
 	}
@@ -158,9 +159,11 @@ func UploadTicket(c *gin.Context) {
 	// 强转int64
 	stationIdInt, _ := strconv.ParseInt(stationIdSrt, 10, 64)
 	ticket := model.Ticket{}
-	if !errors.Is(global.DB.Where("station_id = ?", stationId).
+	err = global.DB.Where("station_id = ?", stationId).
 		Where("client_ticket_id = ?", ticketApiReqDto.TicketId).
-		First(&ticket).Error, gorm.ErrRecordNotFound) {
+		First(&ticket).
+		Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		// 已经找到
 		utils.Success(c, gin.H{}, "信息上传成功")
 		return

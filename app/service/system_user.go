@@ -1,5 +1,6 @@
 package service
 
+//增删改查
 import (
 	"dcr-gin/app/global"
 	"dcr-gin/app/model"
@@ -17,8 +18,11 @@ import (
 
 type UserService struct{}
 
-func findUser(c *gin.Context, userParams requestDto.User) (userResp responseDto.ResponseUser, err error) {
-	result := global.DB.Model(&model.User{}).First(&userParams)
+func findUser(c *gin.Context, userParams requestDto.UserReq) (userResp responseDto.ResponseUser, err error) {
+	result := global.DB.
+		Model(&model.User{}).
+		First(&userParams)
+	dump.P(result)
 	if result.RowsAffected > 0 {
 		// 存在记录
 		return userResp, nil
@@ -28,10 +32,12 @@ func findUser(c *gin.Context, userParams requestDto.User) (userResp responseDto.
 }
 
 // AddUser 新增用户
-func AddUser(c *gin.Context, userParams requestDto.User) error {
+func AddUser(c *gin.Context, userParams requestDto.UserReq) error {
 	userModel := model.User{}
-	if !errors.Is(global.DB.Where("username = ?", userParams.UserName).
-		First(&userModel).Error, gorm.ErrRecordNotFound) {
+	err := global.DB.
+		Where("username = ?", userParams.UserName).
+		First(&userModel).Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		// 判断用户名是否存在
 		return errors.New("账号已存在")
 	}
@@ -39,7 +45,7 @@ func AddUser(c *gin.Context, userParams requestDto.User) error {
 	if err != nil {
 		return errors.New("密码加密错误")
 	}
-
+	dump.P(newPassword)
 	fmt.Println(newPassword)
 	newUser := model.User{
 		UserName: userParams.UserName,
@@ -54,15 +60,17 @@ func AddUser(c *gin.Context, userParams requestDto.User) error {
 }
 
 // EditUser 编辑用户
-func EditUser(c *gin.Context, userParams requestDto.EditUser) error {
+func EditUser(c *gin.Context, userParams requestDto.EditUserReq) error {
 	userModel := model.User{}
 	//判断db是否存在
 	db := global.DB
-	if errors.Is(db.Where("id=?", userParams.Id).First(&userModel).Error, gorm.ErrRecordNotFound) {
+	err := db.Where("id=?", userParams.Id).First(&userModel).Error
+	boolIsTrue := errors.Is(err, gorm.ErrRecordNotFound)
+	if boolIsTrue {
 		//记录不存在
 		return errors.New("此账号不存在")
 	}
-
+	dump.P(boolIsTrue)
 	if userParams.Status != 0 {
 		//获取unix时间戳
 		userParams.Status = time.Now().Unix()
@@ -78,10 +86,13 @@ func EditUser(c *gin.Context, userParams requestDto.EditUser) error {
 }
 
 // ChangeStatus 修改状态
-func ChangeStatus(c *gin.Context, UserParams requestDto.ChangeUserStatus) error {
+func ChangeStatus(c *gin.Context, UserParams requestDto.ChangeUserStatusReq) error {
 	userModel := model.User{}
-	if errors.Is(global.DB.Where("id=?", UserParams.Id).
-		First(&userModel).Error, gorm.ErrRecordNotFound) {
+	err := global.DB.Where("id=?", UserParams.Id).
+		First(&userModel).Error
+	boolIsTrue := errors.Is(err, gorm.ErrRecordNotFound)
+	dump.P(boolIsTrue)
+	if boolIsTrue {
 		//记录不存在 查找一行
 		return errors.New("此账号不存在")
 	}
@@ -99,9 +110,10 @@ func ChangeStatus(c *gin.Context, UserParams requestDto.ChangeUserStatus) error 
 }
 
 // ChangePw 修改密码
-func ChangePw(c *gin.Context, userParams requestDto.ChangePw) error {
+func ChangePw(c *gin.Context, userParams requestDto.ChangePwReq) error {
 	userModel := model.User{}
-	if errors.Is(global.DB.Where("id=?", userParams.Id).First(&userModel).Error, gorm.ErrRecordNotFound) {
+	err := global.DB.Where("id=?", userParams.Id).First(&userModel).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New("此账号不存在")
 	}
 	newPw, salt, err := utils.GeneratePassword(userParams.Password)
@@ -120,10 +132,10 @@ func ChangePw(c *gin.Context, userParams requestDto.ChangePw) error {
 }
 
 // ChangeAdminPw 修改管理员密码
-func ChangeAdminPw(c *gin.Context, userParams requestDto.ChangeAdminPw) error {
+func ChangeAdminPw(c *gin.Context, userParams requestDto.ChangeAdminPwReq) error {
 	userModel := model.User{}
 	err := global.DB.Where("username=?", "admin").First(&userModel).Error
-
+	dump.P(err)
 	if err != nil {
 		return errors.New("管理员账号获取失败")
 	}
@@ -168,21 +180,27 @@ type Response struct {
 }
 
 // UserList 用户列表
-func UserList(c *gin.Context, userListData requestDto.UserList) (err error, ConfigInfo Response) {
+func UserList(c *gin.Context, userListData requestDto.UserListReq) (err error, ConfigInfo Response) {
 	var userListCount []model.User
 	userModelList := []model.User{}
 
 	var responseData Response
+	// 当前页
 	page := userListData.Page
-	pageRows := userListData.PageRows
+	//  每页多少条
+	perPage := userListData.PageRows
 
 	var count int64
 	// 查询总条数
 	global.DB.Find(&userListCount).Count(&count)
 	// 查询列表
-	if err := global.DB.Limit(pageRows).
-		Offset((page - 1) * pageRows).
-		Find(&userModelList).Error; err != nil {
+	err = global.DB.
+		//Select("name","sex").
+		Limit(perPage).
+		Offset((page - 1) * perPage).
+		Find(&userModelList).Error
+
+	if err != nil {
 		return errors.New("获取用户列表失败"), responseData
 	}
 	var Data []ResponseUsers
@@ -190,21 +208,26 @@ func UserList(c *gin.Context, userListData requestDto.UserList) (err error, Conf
 
 	responseData = Response{
 		CurrentPage: page,
-		PageRows:    pageRows,
+		PageRows:    perPage,
 		TotalCount:  count,
 		Data:        Data,
 	}
+
+	dump.P(err)
 	return err, responseData
 
 }
 
 // ChangePassword @function: ChangePassword
-//@description: 修改用户密码
-//@param: u *model.SysUser, newPassword string
-//@return: userInter *model.SysUser,err error
+// @description: 修改用户密码
+// @param: u *model.SysUser, newPassword string
+// @return: userInter *model.SysUser,err error
 func ChangePassword(id uint, newPassword string) (userResp *responseDto.ResponseUser, err error) {
 	var userModel model.User
-	if err = global.DB.Where("id = ?", id).First(&userModel).Error; err != nil {
+	err = global.DB.
+		Where("id = ?", id).
+		First(&userModel).Error
+	if err != nil {
 		//记录不存在
 		return nil, err
 	}

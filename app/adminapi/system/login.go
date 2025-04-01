@@ -31,7 +31,8 @@ post http://localhost:9090/adminapi/system/login
 func Login(c *gin.Context) {
 	var loginDto requestDto.LoginDto
 	// 解析前端传递过来的数据并且验证是否正确
-	if err := c.ShouldBindJSON(&loginDto); err != nil {
+	err := c.ShouldBindJSON(&loginDto)
+	if err != nil {
 		message := utils.ShowErrorMessage(err)
 		utils.Fail(c, message)
 		return

@@ -16,7 +16,7 @@ func IsDev() bool {
 	return isDev
 }
 
-func Collect(in interface{}) collection.Collection {
+func Collect(in any) collection.Collection {
 	//判断in 类型是否是 slice map [] struct  里面已经判断了
 	return collection.Collect(in)
 }

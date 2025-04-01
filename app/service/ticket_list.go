@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gookit/goutil/dump"
+	"gorm.io/gorm"
 )
 
 // TicketList 列表查询返回
@@ -18,6 +20,7 @@ func TicketList(c *gin.Context, params requestDto.TicketListReq) (pageResult res
 
 	db := global.DB.Model(&ticketModelList).Preload("ResponseStation")
 	fmt.Println(params.StationId)
+	dump.P(params.StationId)
 	// 拼接where sql
 	if params.StationId > 0 {
 		db.Where("station_id=?", params.StationId)
@@ -54,10 +57,8 @@ func TicketList(c *gin.Context, params requestDto.TicketListReq) (pageResult res
 	//查询总条目
 	db.Find(&ticketModelList).Count(&count)
 	// 查询列表
-	if err := db.Limit(pageRows).
-		Offset((page - 1) * pageRows).
-		Order("id desc").
-		Find(&ticketModelList).Error; err != nil {
+	err = getListV1(db, pageRows, page, ticketModelList).Error
+	if err != nil {
 		return pageResult, errors.New("获取信息列表失败")
 	}
 	localUrl := global.ServerConfig.Local.Url
@@ -77,11 +78,21 @@ func TicketList(c *gin.Context, params requestDto.TicketListReq) (pageResult res
 		}
 	}
 	// 返回列表Dto
-	return responseDto.ResponsePageResult{
+	result := responseDto.ResponsePageResult{
 		Page:     page,
 		PageRows: pageRows,
 		Total:    count,
 		List:     ticketModelList,
-	}, err
+	}
+	return result, err
 
+}
+
+func getListV1(db *gorm.DB, pageRows int, page int, ticketModelList []model.Ticket) *gorm.DB {
+	return db.
+		//Select("id", "name").
+		Limit(pageRows).
+		Offset((page - 1) * pageRows).
+		Order("id desc").
+		Find(&ticketModelList)
 }

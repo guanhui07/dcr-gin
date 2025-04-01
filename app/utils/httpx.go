@@ -13,7 +13,7 @@ import (
 
 // CurlPost post请求
 // reqMap 可以是结构体 或 map    返回 map[string]any
-func CurlPost(url string, reqMap interface{}) map[string]interface{} {
+func CurlPost(url string, reqMap any) map[string]any {
 	// body体：序列化为 json str
 	body, err := json.Marshal(reqMap)
 	if err != nil {
@@ -54,7 +54,7 @@ func CurlPost(url string, reqMap interface{}) map[string]interface{} {
 	}
 	fmt.Println("respBody: ", string(respBody))
 
-	rspMap := make(map[string]interface{})
+	rspMap := make(map[string]any)
 	// 将body 字符串json 反序列化为 map
 	err = json.Unmarshal(respBody, &rspMap)
 	if err != nil {
@@ -72,7 +72,7 @@ type Rsp struct {
 
 // CurlGet get请求
 // reqMap 可以是结构体 或 map    返回 map[string]any
-func CurlGet(url string, reqMap map[string]interface{}) Rsp {
+func CurlGet(url string, reqMap map[string]any) Rsp {
 	// 请求参数：序列化为 json str
 	body, err := json.Marshal(reqMap)
 	if err != nil {

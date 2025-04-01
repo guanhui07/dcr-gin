@@ -19,10 +19,10 @@ import (
 )
 
 // FindTicket
-//@function: FindTicket
-//@description: 查找信息
-//@param: c *gin.Context, ticketParams model.Ticket
-//@return: userResp responseDto.ResponseUser, err error
+// @function: FindTicket
+// @description: 查找信息
+// @param: c *gin.Context, ticketParams model.Ticket
+// @return: userResp responseDto.ResponseUser, err error
 func FindTicket(c *gin.Context, ticketParams model.Ticket) (userResp responseDto.ResponseUser, err error) {
 	result := global.DB.Model(&model.User{}).First(&ticketParams)
 	// 记录存在
@@ -34,26 +34,29 @@ func FindTicket(c *gin.Context, ticketParams model.Ticket) (userResp responseDto
 }
 
 // UpdateTicket
-//@function: UpdateTicket
-//@description: 修改信息图片路径
-//@param: u *model.SysUser, newPassword string
-//@return: userInter *model.SysUser,err error
-func UpdateTicket(Id string, columnName string, filePath string) (ticketResp *responseDto.Ticket, err error) {
+// @function: UpdateTicket
+// @description: 修改信息图片路径
+// @param: u *model.SysUser, newPassword string
+// @return: userInter *model.SysUser,err error
+func UpdateTicket(Id string, columnName string, val string) (ticketResp *responseDto.Ticket, err error) {
 	ticket := model.Ticket{}
-	if err = global.DB.Where("client_ticket_id = ?", Id).First(&ticket).Error; err != nil {
+	err = global.DB.
+		Where("client_ticket_id = ?", Id).
+		First(&ticket).Error
+	if err != nil {
 		//记录不存在
 		return nil, err
 	}
 
 	switch columnName {
 	case "photo_front":
-		ticket.PhotoFront = filePath
+		ticket.PhotoFront = val
 	case "photo_behind":
-		ticket.PhotoBehind = filePath
+		ticket.PhotoBehind = val
 	case "photo_lorry_number":
-		ticket.PhotoLorryNumber = filePath
+		ticket.PhotoLorryNumber = val
 	case "photo_goods":
-		ticket.PhotoGoods = filePath
+		ticket.PhotoGoods = val
 	default:
 		return nil, errors.New("上传的照片不正确，没有该字段！")
 	}
@@ -61,18 +64,15 @@ func UpdateTicket(Id string, columnName string, filePath string) (ticketResp *re
 	ticket.UpdateTime = time.Now()
 	// 更新图片url
 	err = global.DB.Save(&ticket).Error
-	//如果修改信息图片路径成功则清除该图片缓存
-	if err == nil {
 
-	}
 	return nil, err
 }
 
 // GetTicketPhotoUuid
-//@function: GetTicketPhotoUuid
-//@description: 获取图片名称
-//@param: c *gin.Context, stationTicketId requestDto.StationTicketId
-//@return: map[string]string, error
+// @function: GetTicketPhotoUuid
+// @description: 获取图片名称
+// @param: c *gin.Context, stationTicketId requestDto.StationTicketId
+// @return: map[string]string, error
 func GetTicketPhotoUuid(c *gin.Context, stationTicket requestDto.StationTicketReq) (map[string]string, error) {
 	//优先从缓存中获取
 	cacheKey := fmt.Sprintf("cache:ticketPhoto:stationId:%s:ticketId:%s",
@@ -109,15 +109,17 @@ func GetTicketPhotoUuid(c *gin.Context, stationTicket requestDto.StationTicketRe
 }
 
 // UploadTicketPhoto
-//@function: UploadTicketPhoto
-//@description: 上传图片（需要信息数据上传成功后再上传图片）
-//@param: u *model.SysUser, newPassword string
-//@return: userInter *model.SysUser,err error
-///api/ticket/uploadPhoto?stationId=12
+// @function: UploadTicketPhoto
+// @description: 上传图片（需要信息数据上传成功后再上传图片）
+// @param: u *model.SysUser, newPassword string
+// @return: userInter *model.SysUser,err error
+// /api/ticket/uploadPhoto?stationId=12
 func UploadTicketPhoto(c *gin.Context, params requestDto.TicketUploadReq) (string, error) {
 	ticket := model.Ticket{}
 	//验证信息是否存在
-	firstTicket := global.DB.Where("client_ticket_id=?", params.TicketId).First(&ticket)
+	firstTicket := global.DB.
+		Where("client_ticket_id=?", params.TicketId).
+		First(&ticket)
 	if firstTicket.RowsAffected <= 0 {
 		global.Logger.Info("上传图片时 信息不存在 客户端信息id：" + params.TicketId)
 		return "", errors.New("信息不存在！")
@@ -127,7 +129,9 @@ func UploadTicketPhoto(c *gin.Context, params requestDto.TicketUploadReq) (strin
 	// 转字符串
 	stationIdSrt := fmt.Sprintf("%v", stationId)
 	station := model.Station{}
-	firstStation := global.DB.Where("id=?", stationIdSrt).First(&station)
+	firstStation := global.DB.
+		Where("id=?", stationIdSrt).
+		First(&station)
 	if firstStation.RowsAffected <= 0 {
 		global.Logger.Error("站点不存在! 站点id:" + stationIdSrt)
 		return "", errors.New("站点不存在！")
@@ -154,7 +158,7 @@ func UploadTicketPhoto(c *gin.Context, params requestDto.TicketUploadReq) (strin
 	//获取缓存中的
 	pic, err := global.Redis.Get(context.Background(), cacheKey).Result()
 
-	map2 := make(map[string]interface{})
+	map2 := make(map[string]any)
 	// json_decode 到map里
 	_ = json.Unmarshal([]byte(pic), &map2)
 	var columnName string

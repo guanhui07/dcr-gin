@@ -6,7 +6,7 @@ import (
 )
 
 // ContainsString 判断obj是否在target中，target支持的类型array,slice,map
-func ContainsString(obj interface{}, target interface{}) int {
+func ContainsString(obj any, target any) int {
 	targetValue := reflect.ValueOf(target)
 	switch reflect.TypeOf(target).Kind() {
 	case reflect.Slice, reflect.Array:
@@ -46,7 +46,7 @@ func testArray() {
 	fmt.Println(ContainsString(e, f))
 
 	g := 1
-	h := [4]interface{}{2, 4, 6, 1}
+	h := [4]any{2, 4, 6, 1}
 	fmt.Println(ContainsString(g, h))
 
 	i := [4]int64{}
@@ -68,7 +68,7 @@ func testSlice() {
 	fmt.Println(ContainsString(e, f))
 
 	g := 1
-	h := []interface{}{2, 4, 6, 1}
+	h := []any{2, 4, 6, 1}
 	fmt.Println(ContainsString(g, h))
 
 	var i []int64

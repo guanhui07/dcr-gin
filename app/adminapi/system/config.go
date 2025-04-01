@@ -17,7 +17,8 @@ post http://localhost:9090/adminapi/system/edit/config
 }
 */
 func EditConfig(c *gin.Context) {
-	var configDto requestDto.CreateConfig
+	var configDto requestDto.CreateConfigReq
+	//  解析到结构体
 	err := c.ShouldBindJSON(&configDto)
 	if err != nil {
 		message := utils.ShowErrorMessage(err)
@@ -43,7 +44,7 @@ curl -X GET http://localhost:9090/adminapi/system/config/info
 }
 */
 func ConfigInfo(c *gin.Context) {
-	var config requestDto.CreateConfig
+	var config requestDto.CreateConfigReq
 	err, responseConfig := service.ConfigInfo(c, config)
 	if err == nil {
 		utils.Success(c, responseConfig, "获取配置成功")

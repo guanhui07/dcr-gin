@@ -10,7 +10,7 @@ func InitStationRouter(Router *gin.RouterGroup) {
 	//设置中间件 公用path
 	StationRouter := Router.Group("/station", middleware.AuthMiddleWare())
 	// /adminapi/station/create
-	StationRouter.POST("create", station.RegisterStation) // 注册
+	StationRouter.POST("create", station.AddStation) // 注册
 	// /adminapi/station/edit
 	StationRouter.POST("edit", station.EditStation) // 编辑站点
 	// /adminapi/station/list

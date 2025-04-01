@@ -21,15 +21,15 @@ type RetryTicketList struct {
 func RightTicketList(c *gin.Context) (err error, list []RetryTicketList) {
 	ticketListData := model.Ticket{}
 	var RetryTicketListValue []RetryTicketList
-
-	if err := global.DB.Model(ticketListData).Where("pf_ticket_info.upload_status=?", 1).
+	err = global.DB.Model(ticketListData).Where("pf_ticket_info.upload_status=?", 1).
 		Select("pf_ticket_info.id",
 			"date_format(pf_ticket_info.add_time,'%Y-%m-%d %H:%i:%s') as date",
 			"pf_ticket_info.station_id",
 			"pf_ticket_info.ticket_sn",
 			"pf_station_info.name").
 		Joins("left join pf_station_info on pf_station_info.id = pf_ticket_info.station_id").
-		Find(&RetryTicketListValue).Error; err != nil {
+		Find(&RetryTicketListValue).Error
+	if err != nil {
 		return errors.New("获取重试信息失败"), []RetryTicketList{}
 	}
 

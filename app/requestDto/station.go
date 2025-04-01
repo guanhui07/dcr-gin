@@ -1,10 +1,10 @@
 package requestDto
 
 type MyJson struct {
-	v interface{}
+	v any
 }
 
-type AddStation struct {
+type AddStationReq struct {
 	Name string `json:"name" binding:"required"` //  站点名称
 	//Location    string `json:"location" binding:"required"` // 坐标
 	IpAddress   string `json:"ip_address" binding:"required"`          // 站点ip地址,非此IP数据不接收
@@ -25,7 +25,7 @@ type AddStation struct {
 }
 */
 
-type EditStation struct {
+type EditStationReq struct {
 	Name        string  `json:"name"`         //  站点名称
 	IpAddress   string  `json:"ip_address"`   // 站点ip地址,非此IP数据不接收
 	TigerShaped string  `json:"tiger_shaped"` // 握手符号 32位
@@ -45,12 +45,12 @@ type EditStation struct {
 }
 */
 
-type StationList struct {
+type StationListReq struct {
 	Page     int `json:"page,default=1" form:"page,default=1" `
 	PageRows int `json:"page_rows,default=10" form:"page_rows,default=10" `
 }
 
-type StationStatus struct {
+type StationStatusReq struct {
 	Id     int64 `json:"id" binding:"required,gt=0"`
 	Status int64 `json:"status" binding:"gte=0"`
 }

@@ -1,6 +1,6 @@
 package requestDto
 
-type User struct {
+type UserReq struct {
 	UserName string `json:"username" binding:"required,min=3,max=10"`
 	Password string `json:"password" binding:"required,min=6,max=16"`
 }
@@ -12,7 +12,7 @@ type User struct {
 }
 */
 
-type EditUser struct {
+type EditUserReq struct {
 	UserName string `json:"username" binding:"min=2,max=10"`
 	Status   int64  `json:"status"`
 	Id       int32  `json:"id" binding:"required,gt=0"`
@@ -32,14 +32,15 @@ type ChangeUser struct {
 	Id       int32  `json:"id" binding:"required,gt=0"`
 }
 
-/**
+/*
+*
 {
 "username":"fsd",
 "status":"sdf",
 "id":"sdf",
 }
 */
-type ChangeUserStatus struct {
+type ChangeUserStatusReq struct {
 	Status int64 `json:"status"`
 	Id     int32 `json:"id" binding:"required,gt=0"`
 }
@@ -51,7 +52,7 @@ type ChangeUserStatus struct {
 }
 */
 
-type ChangePw struct {
+type ChangePwReq struct {
 	Id       int32  `json:"id" binding:"required,gt=0"`
 	Password string `json:"password" binding:"required,min=6,max=16"`
 }
@@ -63,7 +64,7 @@ type ChangePw struct {
 }
 */
 
-type ChangeAdminPw struct {
+type ChangeAdminPwReq struct {
 	//Id              int32  `json:"id" binding:"required,gt=0"`
 	OldPassword    string `json:"old_password" binding:"required,min=6,max=16" `
 	RepeatPassword string `json:"repeat_password" binding:"required,min=6,max=16"`
@@ -78,7 +79,7 @@ type ChangeAdminPw struct {
 }
 */
 
-type UserList struct {
+type UserListReq struct {
 	Page     int `json:"page,default=1" form:"page,default=1"`
 	PageRows int `json:"page_rows,default=10" form:"page_rows,default=10" `
 }

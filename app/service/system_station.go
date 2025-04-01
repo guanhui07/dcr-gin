@@ -15,7 +15,9 @@ import (
 )
 
 func findStation(c *gin.Context, stationParams model.Ticket) (userResp responseDto.ResponseUser, err error) {
-	result := global.DB.Model(&model.User{}).First(&stationParams)
+	result := global.DB.
+		Model(&model.User{}).
+		First(&stationParams)
 	// 影响行数
 	if result.RowsAffected > 0 {
 		return userResp, nil
@@ -29,11 +31,12 @@ type localJson struct {
 	Lng float32 `json:"lng"`
 }
 
-func CreateStation(c *gin.Context, stationParams requestDto.AddStation) error {
+func CreateStation(c *gin.Context, stationParams requestDto.AddStationReq) error {
 	stationModel := model.Station{}
 	db := global.DB.Model(stationModel)
-	if !errors.Is(db.Where("name=?", stationParams.Name).
-		First(&stationModel).Error, gorm.ErrRecordNotFound) {
+	err := db.Where("name=?", stationParams.Name).
+		First(&stationModel).Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		//找到记录
 		return errors.New("此站点已经存在,无法创建")
 	}
@@ -44,7 +47,7 @@ func CreateStation(c *gin.Context, stationParams requestDto.AddStation) error {
 	//序列化 为json str
 	locationJson, _ := json.Marshal(location)
 
-	stations := model.Station{
+	insertData := model.Station{
 		Name:        stationParams.Name,
 		Location:    locationJson,
 		IpAddress:   stationParams.IpAddress,
@@ -53,19 +56,20 @@ func CreateStation(c *gin.Context, stationParams requestDto.AddStation) error {
 		UpdateTime:  time.Now(),
 	}
 	// 找不到记录则 新增
-	tx := db.Create(&stations)
+	tx := db.Create(&insertData)
 	return tx.Error
 }
 
 // EditStation 编辑站点
-func EditStation(c *gin.Context, stationParams requestDto.EditStation) error {
+func EditStation(c *gin.Context, stationParams requestDto.EditStationReq) error {
 	//,"lng":162.34,"lat":25.35,"ip_address":"192.168.1.222","tiger_shaped":"ElsHZsFObISAMrN7uaiHXwVOAmEjRQrE"
 	stationModel := model.Station{}
 	// 查找一行
 	db := global.DB.Model(stationModel)
-	if errors.Is(db.
+	err := db.
 		Where("id=?", stationParams.Id).
-		First(&stationModel).Error, gorm.ErrRecordNotFound) {
+		First(&stationModel).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		//站点不存在
 		return errors.New("此站点不存在,无法修改")
 	}
@@ -127,7 +131,7 @@ type ResponseStation struct {
 	Data        []station `json:"data"`
 }
 
-func StationList(c *gin.Context, params requestDto.StationList) (err error, configInfo ResponseStation) {
+func StationList(c *gin.Context, params requestDto.StationListReq) (err error, configInfo ResponseStation) {
 	var stationListCount []model.Station
 	var stationListData []model.Station
 
@@ -140,9 +144,10 @@ func StationList(c *gin.Context, params requestDto.StationList) (err error, conf
 	db.Find(&stationListCount).Count(&count)
 
 	// 查多行 返回切片列表
-	if err := db.Limit(pageRows).
+	err = db.Limit(pageRows).
 		Offset((page - 1) * pageRows).
-		Find(&stationListData).Error; err != nil {
+		Find(&stationListData).Error
+	if err != nil {
 		return errors.New("获取用户列表失败"), responseData
 	}
 
@@ -164,7 +169,9 @@ func FindStationLastId(c *gin.Context) (id int64, err error) {
 	var stationModel model.Station
 	// 最后一行记录 order by id desc
 	db := global.DB.Model(stationModel)
-	result := db.Model(&model.Station{}).Last(&stationModel)
+	result := db.Model(&model.Station{}).
+		Order("id desc").
+		First(&stationModel)
 	if result.RowsAffected > 0 {
 		return stationModel.Id + 1, nil
 	}
@@ -172,18 +179,35 @@ func FindStationLastId(c *gin.Context) (id int64, err error) {
 
 }
 
+// FindStationLastId 获取新站点id
+func FindStationById(c *gin.Context, id int64) (station *gorm.DB, err error) {
+	var stationModel model.Station
+	// 最后一行记录 order by id desc
+	db := global.DB.Model(stationModel)
+	result := db.Model(&model.Station{}).
+		Order("id desc").
+		Where("id=?", id).
+		First(&stationModel)
+	//if result.RowsAffected > 0 {
+	//	return stationModel.Id + 1, nil
+	//}
+	return result, nil
+
+}
+
 // ChangeStationStatus 修改站点状态
-func ChangeStationStatus(c *gin.Context, param requestDto.StationStatus) error {
+func ChangeStationStatus(c *gin.Context, param requestDto.StationStatusReq) error {
 	stationModel := model.Station{}
 	// 查找一行
 	db := global.DB.Model(stationModel)
-	if errors.Is(db.Where("id=?", param.Id).First(&stationModel).Error, gorm.ErrRecordNotFound) {
-		//记录不存在
+	err := db.
+		Where("id=?", param.Id).
+		First(&stationModel).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New("此站点不存在")
 	}
 
 	if stationModel.Id == 0 {
-		//记录不存在
 		return errors.New("此站点不存在")
 	}
 

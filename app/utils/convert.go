@@ -591,6 +591,25 @@ func JSONToStruct(jsonStr string, obj any) error {
 	return json.Unmarshal([]byte(jsonStr), obj)
 }
 
+// MapToJSON 将 map 转换为 JSON 字符串
+func MapToJSON(data map[string]interface{}) (string, error) {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), nil
+}
+
+// JSONToMap 将 JSON 字符串转换为 map
+func JSONToMap(jsonStr string) (map[string]interface{}, error) {
+	var result map[string]interface{}
+	err := json.Unmarshal([]byte(jsonStr), &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // BytesToString 将字节切片转换为字符串
 func BytesToString(b []byte) string {
 	return string(b)

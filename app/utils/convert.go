@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
+	"reflect"
 	"strconv"
+	"time"
 )
 
 // ToInt64 把能转换成 int64 的值转换成 int64
@@ -550,4 +553,60 @@ func ToString(rawValue any, defaultValue string) string {
 	}
 
 	return defaultValue
+}
+
+// StructToMap 将结构体转换为 map
+func StructToMap(obj any) map[string]any {
+	result := make(map[string]any)
+	v := reflect.ValueOf(obj)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return result
+	}
+	t := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		field := t.Field(i)
+		tag := field.Tag.Get("json")
+		if tag == "" {
+			tag = field.Name
+		}
+		result[tag] = v.Field(i).Interface()
+	}
+	return result
+}
+
+// StructToJSON 将结构体转换为 JSON 字符串
+func StructToJSON(obj any) (string, error) {
+	data, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+// JSONToStruct 将 JSON 字符串转换为结构体
+func JSONToStruct(jsonStr string, obj any) error {
+	return json.Unmarshal([]byte(jsonStr), obj)
+}
+
+// BytesToString 将字节切片转换为字符串
+func BytesToString(b []byte) string {
+	return string(b)
+}
+
+// StringToBytes 将字符串转换为字节切片
+func StringToBytes(s string) []byte {
+	return []byte(s)
+}
+
+// TimeToString 将时间转换为指定格式的字符串
+func TimeToString(t time.Time, format string) string {
+	return t.Format(format)
+}
+
+// StringToTime 将指定格式的字符串转换为时间
+func StringToTime(str, format string) (time.Time, error) {
+	return time.Parse(format, str)
 }

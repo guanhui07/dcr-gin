@@ -1,6 +1,6 @@
 module dcr-gin
 
-go 1.18
+go 1.24
 
 require (
 	github.com/chenhg5/collection v0.0.0-20200925143926-f403b87088f9
